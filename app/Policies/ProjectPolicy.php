@@ -1,4 +1,5 @@
-pp<?php
+<?php
+
 namespace App\Policies;
 
 use App\Models\Project;
@@ -22,4 +23,3 @@ class ProjectPolicy
         return $project->user_id === $user->id;
     }
 }
-

@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\AiJob;
 use Illuminate\Http\Request;
+
 
 class AiJobController extends Controller
 {
@@ -58,50 +60,3 @@ class AiJobController extends Controller
         return response()->noContent();
     }
 }
-<?php
-namespace App\Http\Controllers;
-
-use App\Models\Project;
-use Illuminate\Http\Request;
-
-class ProjectController extends Controller
-{
-    public function index()
-    {
-        return Project::with(['user', 'sketches', 'mockups', 'patterns'])->get();
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|in:draft,in_progress,completed',
-        ]);
-        return Project::create($validated);
-    }
-
-    public function show(Project $project)
-    {
-        return $project->load(['user', 'sketches', 'mockups', 'patterns']);
-    }
-
-    public function update(Request $request, Project $project)
-    {
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'sometimes|required|in:draft,in_progress,completed',
-        ]);
-        $project->update($validated);
-        return $project;
-    }
-
-    public function destroy(Project $project)
-    {
-        $project->delete();
-        return response()->noContent();
-    }
-}
-

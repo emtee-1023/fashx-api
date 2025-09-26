@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Project;
@@ -39,23 +40,27 @@ class SketchController extends Controller
 
     public function show(Sketch $sketch)
     {
-        return $sketch->load(['project', 'mockups']);
+        $this->authorize('view', $sketch);
+        $sketch->load(['project', 'mockups']);
+        return response()->json(['success' => true, 'sketch' => $sketch]);
     }
 
     public function update(Request $request, Sketch $sketch)
     {
+        $this->authorize('update', $sketch);
         $validated = $request->validate([
             'file_path' => 'sometimes|required|string',
             'original_filename' => 'sometimes|required|string',
             'notes' => 'nullable|string',
         ]);
         $sketch->update($validated);
-        return $sketch;
+        return response()->json(['success' => true, 'sketch' => $sketch]);
     }
 
     public function destroy(Sketch $sketch)
     {
+        $this->authorize('delete', $sketch);
         $sketch->delete();
-        return response()->noContent();
+        return response()->json(['success' => true]);
     }
 }

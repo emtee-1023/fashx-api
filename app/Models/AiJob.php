@@ -1,15 +1,26 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Project extends Model
+class AiJob extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'description', 'status'
+        'user_id',
+        'project_id',
+        'sketch_id',
+        'mockup_id',
+        'pattern_id',
+        'type',
+        'status',
+        'prompt',
+        'model_used',
+        'error_message',
+        'result_file_path'
     ];
 
     public function user()
@@ -17,19 +28,23 @@ class Project extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function sketches()
+    public function project()
     {
-        return $this->hasMany(Sketch::class);
+        return $this->belongsTo(Project::class);
     }
 
-    public function mockups()
+    public function sketch()
     {
-        return $this->hasMany(Mockup::class);
+        return $this->belongsTo(Sketch::class);
     }
 
-    public function patterns()
+    public function mockup()
     {
-        return $this->hasMany(Pattern::class);
+        return $this->belongsTo(Mockup::class);
+    }
+
+    public function pattern()
+    {
+        return $this->belongsTo(Pattern::class);
     }
 }
-

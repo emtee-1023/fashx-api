@@ -8,16 +8,12 @@ use App\Http\Controllers\SketchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-Route::apiResource('projects', ProjectController::class)->only(['index', 'store', 'show']);
-
-
-
 Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+        Route::apiResource('projects', controller: ProjectController::class)->only(['index', 'store', 'show']);
         Route::get('projects/{project}/sketches', [SketchController::class, 'index']);
         Route::post('projects/{project}/sketches', [SketchController::class, 'store']);
         Route::apiResource('mockups', MockupController::class);
