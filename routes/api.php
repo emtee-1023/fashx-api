@@ -8,6 +8,9 @@ use App\Http\Controllers\SketchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::apiResource('ai-jobs', AiJobController::class);
+
+
 Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/user', function (Request $request) {
@@ -18,5 +21,5 @@ Route::middleware(['auth:sanctum'])
         Route::post('projects/{project}/sketches', [SketchController::class, 'store']);
         Route::apiResource('mockups', MockupController::class);
         Route::apiResource('patterns', PatternController::class);
-        Route::apiResource('ai-jobs', AiJobController::class);
+        Route::post('ai-jobs/generate-mockups', [AiJobController::class, 'generateMockups']);
     });

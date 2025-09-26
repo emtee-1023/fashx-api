@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('sketch_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('mockup_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('pattern_id')->nullable()->constrained()->onDelete('set null');
-            $table->enum('type', ['sketch_to_mockup', 'mockup_to_pattern', 'other']);
+            $table->enum('type', ['sketch_to_mockup', 'mockup_to_pattern', 'mockup_generation', 'other']);
             $table->enum('status', ['pending', 'running', 'completed', 'failed'])->default('pending');
             $table->text('prompt')->nullable();
             $table->string('model_used')->nullable();

@@ -31,9 +31,24 @@ class AiJobController extends Controller
         return AiJob::create($validated);
     }
 
+    /**
+     * Show job status and result for a given AiJob.
+     */
     public function show(AiJob $aiJob)
     {
-        return $aiJob->load(['user', 'project', 'sketch', 'mockup', 'pattern']);
+        $aiJob->load(['user', 'project', 'sketch', 'mockup', 'pattern']);
+        $response = [
+            'id' => $aiJob->id,
+            'type' => $aiJob->type,
+            'status' => $aiJob->status,
+            'prompt' => $aiJob->prompt,
+            'error_message' => $aiJob->error_message,
+            'created_at' => $aiJob->created_at,
+            'updated_at' => $aiJob->updated_at,
+            'sketch' => $aiJob->sketch,
+            'mockup' => $aiJob->mockup,
+        ];
+        return response()->json(['success' => true, 'job' => $response]);
     }
 
     public function update(Request $request, AiJob $aiJob)
@@ -58,5 +73,38 @@ class AiJobController extends Controller
     {
         $aiJob->delete();
         return response()->noContent();
+    }
+
+    /**
+     * Generate mockups for one or more sketches in a project.
+     * Request: { project_id, sketch_ids: [], prompt }
+     */
+    public function generateMockups(Request $request)
+    {
+        $validated = $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'sketch_ids' => 'required|array',
+            'sketch_ids.*' => 'exists:sketches,id',
+            'prompt' => 'required|string',
+        ]);
+
+        $userId = $request->user()->id;
+        $jobs = [];
+        foreach ($validated['sketch_ids'] as $sketchId) {
+            $aiJob = \App\Models\AiJob::create([
+                'user_id' => $userId,
+                'project_id' => $validated['project_id'],
+                'sketch_id' => $sketchId,
+                'type' => 'mockup_generation',
+                'status' => 'pending',
+                'prompt' => $validated['prompt'],
+            ]);
+            \App\Jobs\GenerateMockupJob::dispatch($aiJob);
+            $jobs[] = $aiJob;
+        }
+        return response()->json([
+            'success' => true,
+            'jobs' => $jobs,
+        ]);
     }
 }
