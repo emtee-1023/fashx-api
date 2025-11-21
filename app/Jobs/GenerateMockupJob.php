@@ -44,18 +44,17 @@ class GenerateMockupJob implements ShouldQueue
             $imageDomain = env('IMAGE_DOMAIN', config('app.url'));
             $sketchUrl = rtrim($imageDomain, '/') . '/storage/' . ltrim($sketch->file_path, '/');
             $apiToken = env('REPLICATE_API_TOKEN');
-            $endpoint = 'https://api.replicate.com/v1/predictions';
-            $modelVersion = '7de2ea26c616d5bf2245ad0d5d7c9e0fc60c79c7a0e71e03a3c8c8a1b36a0da1';
-
-            $prompt = $this->aiJob->prompt ?: 'A realistic fashion model wearing the outfit from the sketch, white background, editorial lighting';
-
+            $endpoint = 'https://api.replicate.com/v1/models/google/nano-banana/predictions';
+            $prompt = $this->aiJob->prompt ?: 'Make the sheets in the style of the logo. Make the scene natural.';
+            $imageInputs = [$sketchUrl];
             $response = Http::withToken($apiToken)
                 ->acceptJson()
+                ->withOptions(['verify' => false])
                 ->post($endpoint, [
-                    'version' => $modelVersion,
                     'input' => [
-                        'image' => $sketchUrl,
                         'prompt' => $prompt,
+                        'image_input' => $imageInputs,
+                        'output_format' => 'jpg',
                     ],
                 ]);
 
@@ -81,7 +80,10 @@ class GenerateMockupJob implements ShouldQueue
             $outputUrl = null;
             for ($i = 0; $i < 60; $i++) { // max 5 minutes
                 sleep(5);
-                $poll = Http::withToken($apiToken)->acceptJson()->get($pollEndpoint);
+                $poll = Http::withToken($apiToken)
+                    ->acceptJson()
+                    ->withOptions(['verify' => false])
+                    ->get($pollEndpoint);
                 if (!$poll->successful()) {
                     continue;
                 }
@@ -112,7 +114,7 @@ class GenerateMockupJob implements ShouldQueue
                     'sketch_id' => $sketch->id,
                     'image_path' => $filename,
                     'prompt_used' => $prompt,
-                    'model_used' => $modelVersion,
+                    'model_used' => 'google/nano-banana',
                 ]);
                 $this->aiJob->status = 'completed';
                 $this->aiJob->save();
